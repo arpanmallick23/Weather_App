@@ -5,6 +5,11 @@
 **A sleek weather app built with React + Vite, styled with Material UI.**
 Search any city and get real-time conditions, powered by OpenWeatherMap.
 
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=white)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vite.dev/)
+[![MUI](https://img.shields.io/badge/MUI-7-007FFF?style=for-the-badge&logo=mui&logoColor=white)](https://mui.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+
 [**🚀 Live Demo**](https://arpanmallick23.github.io/Weather_App/) · [Report Bug](https://github.com/arpanmallick23/Weather_App/issues) · [Request Feature](https://github.com/arpanmallick23/Weather_App/issues)
 
 </div>
