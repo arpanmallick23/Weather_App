@@ -1,62 +1,91 @@
 import { useState } from "react";
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
 import "./SearchBox.css";
 
 export default function SearchBox({ updateInfo }) {
-    let [city, setCity] = useState("");
-    let [error, setError] = useState(false);
-    const API_URL = "http://api.openweathermap.org/data/2.5/weather";
-    const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
+    const [city, setCity] = useState("");
+    const [error, setError] = useState("");
 
-    let getWeatherInfo = async () => {
-        try {
-            let response = await fetch(`${API_URL}?q=${city}&appid=${API_KEY}&units=metric`);
-            let jsonResponse = await response.json();
-            let result = {
-            city: city,
-            temp: jsonResponse.main.temp,
-            tempMin: jsonResponse.main.temp_min,
-            tempMax: jsonResponse.main.temp_max,
-            humidity: jsonResponse.main.humidity,
-            feelsLike: jsonResponse.main.feels_like,
-            weather: jsonResponse.weather[0].description,
-            weatherMain: jsonResponse.weather[0].main,
-            weatherIcon: jsonResponse.weather[0].icon
-            };
-            console.log(result);
-            return result;
-        } catch(err) {
-            throw err;
-        } 
-    };
-    
+    const API_URL = "https://api.openweathermap.org/data/2.5/weather";
+    const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
-    let handleChange = (evt) => {
-        setCity(evt.target.value);
-    };
-
-    let handleSubmit = async (evt) => {
-        try {
-            evt.preventDefault();
-            console.log(city);
-            setCity("");
-            let newinfo = await getWeatherInfo();
-            updateInfo(newinfo);
-        } catch(err) {
-            setError(true)
+    const getWeatherInfo = async () => {
+        if (!API_KEY) {
+            throw new Error("API key is missing.");
         }
-        
+
+        const response = await fetch(
+            `${API_URL}?q=${encodeURIComponent(city.trim())}&appid=${API_KEY}&units=metric`
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            if (response.status === 404) {
+                throw new Error("City not found. Please check the city name.");
+            }
+
+            if (response.status === 401) {
+                throw new Error("Invalid OpenWeather API key.");
+            }
+
+            throw new Error(data.message || "Unable to fetch weather data.");
+        }
+
+        return {
+            city: data.name,
+            temp: data.main.temp,
+            tempMin: data.main.temp_min,
+            tempMax: data.main.temp_max,
+            humidity: data.main.humidity,
+            feelsLike: data.main.feels_like,
+            weather: data.weather[0].description,
+        };
+    };
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+
+        if (!city.trim()) return;
+
+        setError("");
+
+        try {
+            const newInfo = await getWeatherInfo();
+            updateInfo(newInfo);
+            setCity("");
+        } catch (err) {
+            console.error(err);
+            setError(err.message);
+        }
     };
 
     return (
-        <div className='SearchBox'>
+        <div className="SearchBox">
             <form onSubmit={handleSubmit}>
-                <TextField id="city" label="City Name" variant="outlined" required value={city} onChange={handleChange}/>
-                <br /><br />
-                <Button variant="contained" type='submit'>Search</Button>
-                {error && <p style={{color: "red"}}>No such place exists!</p>}
+                <TextField
+                    id="city"
+                    label="Enter city name"
+                    variant="outlined"
+                    required
+                    value={city}
+                    onChange={(event) => setCity(event.target.value)}
+                />
+
+                <br />
+                <br />
+
+                <Button variant="contained" type="submit">
+                    Search
+                </Button>
+
+                {error && (
+                    <p className="error-message">
+                        {error}
+                    </p>
+                )}
             </form>
         </div>
-    )
+    );
 }
