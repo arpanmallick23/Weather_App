@@ -16,21 +16,27 @@ export default function SearchBox({ updateInfo }) {
         }
 
         const response = await fetch(
-            `${API_URL}?q=${encodeURIComponent(city.trim())}&appid=${API_KEY}&units=metric`
+            `${API_URL}?q=${encodeURIComponent(
+                city.trim()
+            )}&appid=${API_KEY}&units=metric`
         );
 
         const data = await response.json();
 
         if (!response.ok) {
             if (response.status === 404) {
-                throw new Error("City not found. Please check the city name.");
+                throw new Error(
+                    "City not found. Please check the city name."
+                );
             }
 
             if (response.status === 401) {
                 throw new Error("Invalid OpenWeather API key.");
             }
 
-            throw new Error(data.message || "Unable to fetch weather data.");
+            throw new Error(
+                data.message || "Unable to fetch weather data."
+            );
         }
 
         return {
@@ -40,24 +46,38 @@ export default function SearchBox({ updateInfo }) {
             tempMax: data.main.temp_max,
             humidity: data.main.humidity,
             feelsLike: data.main.feels_like,
+
+            // Weather description
             weather: data.weather[0].description,
+
+            // IMPORTANT:
+            // Used by InfoBox to select the correct picture
+            // Clear, Clouds, Rain, Drizzle, Snow, Mist, Haze, etc.
+            weatherMain: data.weather[0].main,
         };
     };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        if (!city.trim()) return;
+        if (!city.trim()) {
+            return;
+        }
 
         setError("");
 
         try {
             const newInfo = await getWeatherInfo();
+
             updateInfo(newInfo);
+
             setCity("");
         } catch (err) {
             console.error(err);
-            setError(err.message);
+
+            setError(
+                err.message || "Something went wrong. Please try again."
+            );
         }
     };
 
@@ -76,7 +96,10 @@ export default function SearchBox({ updateInfo }) {
                 <br />
                 <br />
 
-                <Button variant="contained" type="submit">
+                <Button
+                    variant="contained"
+                    type="submit"
+                >
                     Search
                 </Button>
 
